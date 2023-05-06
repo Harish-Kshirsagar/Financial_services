@@ -4,13 +4,17 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { baseUrl } from "../constants";
 import axios from "axios";
-const Register = () => {
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
+const Register = React.memo(() => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     userName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    profilePicture: "",
+    selectedOption: "",
   });
 
   const handleChange = (event) => {
@@ -23,6 +27,42 @@ const Register = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     console.log("Form Data", formData);
+
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const res = await axios.post(
+        `${baseUrl}/user/register`,
+        formData,
+        config
+      );
+      console.log(res.data);
+      setFormData({
+        userName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        selectedOption: "",
+      });
+      if (res.status === 200) {
+        toast.success("Register Successful", {
+          position: "top-left",
+        });
+        navigate("/");
+      } else {
+        toast.error("something went wrong please check details again", {
+          position: "top-left",
+        });
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error("something went wrong please check details again", {
+        position: "top-left",
+      });
+    }
   };
 
   return (
@@ -69,10 +109,14 @@ const Register = () => {
           />
           <hr />
 
-          <select value={""} className={style.inputFeild}>
+          <select
+            name="selectedOption"
+            className={style.inputFeild}
+            onChange={handleChange}
+          >
             <option value="">Select an option</option>
             <option value="Relationship_Manager">Relationship Manager</option>
-            <option value="Relationship Manager">Operations Manager</option>
+            <option value="Operations_Manager">Operations Manager</option>
           </select>
           <hr />
 
@@ -83,8 +127,9 @@ const Register = () => {
           <Link to="/">here</Link>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
-};
+});
 
 export default Register;

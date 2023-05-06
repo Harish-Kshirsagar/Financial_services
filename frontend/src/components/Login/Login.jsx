@@ -4,6 +4,8 @@ import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { baseUrl } from "../constants";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const Login = () => {
   const navigate = useNavigate();
   const [loginDetails, setLoginDetails] = useState({
@@ -21,6 +23,39 @@ const Login = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     console.log(loginDetails);
+
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const res = await axios.post(
+        `${baseUrl}/user/login`,
+        loginDetails,
+        config
+      );
+      console.log(res.data);
+      setLoginDetails({
+        email: "",
+        password: "",
+      });
+      if (res.status === 200) {
+        toast.success("Login Successful", {
+          position: "top-left",
+        });
+        navigate("/home");
+      } else {
+        toast.error("something went wrong", {
+          position: "top-left",
+        });
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error("something went wrong", {
+        position: "top-left",
+      });
+    }
   };
 
   return (
@@ -47,12 +82,12 @@ const Login = () => {
           />
           <hr />
           <button className={style.formSubmitButton}>Sign In</button>
-          <button className={style.formSubmitButton}>
+          {/* <button className={style.formSubmitButton}>
             Sign In As Relationship Manager
           </button>
           <button className={style.formSubmitButton}>
             Sign In As Oprational Manager
-          </button>
+          </button> */}
         </form>
         <div className={style.registUserRedirect}>
           <span>Don't have account </span>&nbsp;
