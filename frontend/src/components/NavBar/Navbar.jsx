@@ -4,7 +4,12 @@ const Navbar = React.memo(() => {
   return (
     <>
       <div className={style.navbarContainer}>
-        Amrutvahini financial Services
+        <div className={style.navbarLeftSide}>
+          Amrutvahini Financial Services
+        </div>
+        <div className={style.navbarRightSide}>
+          <button className={style.logoutButton}>Logout</button>
+        </div>
       </div>
     </>
   );
