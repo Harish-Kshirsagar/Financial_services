@@ -44,6 +44,8 @@ const Login = () => {
         toast.success("Login Successful", {
           position: "top-left",
         });
+        const userDetails = JSON.stringify(res.data);
+        localStorage.setItem("user", userDetails);
         navigate("/home");
       } else {
         toast.error("something went wrong", {

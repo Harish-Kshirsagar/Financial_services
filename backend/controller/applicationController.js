@@ -26,6 +26,7 @@ const createDraftApplication = async (req, res) => {
     const realationShipManger = await User.findById(
       req.body.relationshipManagerId
     );
+    console.log("saved app " + savedApplication._id);
     await realationShipManger.updateOne({
       $push: { applications: savedApplication._id },
     });

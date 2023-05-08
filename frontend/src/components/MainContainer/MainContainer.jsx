@@ -4,12 +4,27 @@ import InputMask from "react-input-mask";
 import { FaGreaterThan } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
+import { baseUrl } from "../constants";
+import Spinners from "../Spinners";
+import { useNavigate } from "react-router-dom";
 const MainContainer = () => {
   const [asideClick, setAsideClick] = useState("open_account");
   const [dashBoardSelection, setDashboardSelection] = useState("submited");
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchDraftedData, setFetchDraftedData] = useState([]);
+  const [fetchSubmitedData, setFetchSubmitedData] = useState([]);
+  const [viewApplication, setViewApplicatoin] = useState(false);
+  const [viewApplicationData, setViewApplicatoinData] = useState({});
+  const loggedInUser = localStorage.getItem("user");
+  const user = JSON.parse(loggedInUser);
+  const userId = user._id;
+  // console.log("userId" + userId);
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     relationshipManagerName: "",
+    relationshipManagerId: "",
     customerName: "",
     address: "",
     pan: "",
@@ -17,7 +32,7 @@ const MainContainer = () => {
     dob: "",
     email: "",
     phoneNumber: "",
-    selectedOptions: [],
+    products: [],
   });
 
   const handleChange = (event) => {
@@ -30,65 +45,137 @@ const MainContainer = () => {
   const handleProductSelection = (event) => {
     const option = event.target.value;
     console.log(option);
-    if (formData.selectedOptions.includes(option)) {
+    if (formData.products.includes(option)) {
       setFormData({
         ...formData,
-        selectedOptions: formData.selectedOptions.filter(
+        products: formData.products.filter(
           (selectedOption) => selectedOption !== option
         ),
       });
     } else {
       setFormData({
         ...formData,
-        selectedOptions: [...formData.selectedOptions, option],
+        products: [...formData.products, option],
       });
     }
   };
 
   const handleFormSaveData = async () => {
-    console.log("formData", formData);
     setAsideClick("product_selection");
   };
 
   const handleMoveToSummary = async () => {
-    // for (let i = 0; i < formData.selectedOptions.length; i++) {
-    //   console.log("index " + i + " " + formData.selectedOptions[i]);
-    // }
     setAsideClick("summary_page");
   };
 
-  const handleSaveAsDraft = () => {
-    setFormData({
-      relationshipManagerName: "",
-      customerName: "",
-      address: "",
-      pan: "",
-      adharNumber: "",
-      dob: "",
-      email: "",
-      phoneNumber: "",
-      selectedOptions: [],
-    });
-    setAsideClick("open_account");
-    toast.success("Application saved as draft");
-    //todo : here you need to call and save status as draft
+  const handleSaveAsDraft = async () => {
+    formData.relationshipManagerId = userId;
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const response = await axios.post(
+        `${baseUrl}/application/draft`,
+        formData,
+        config
+      );
+      if (response.status === 200) {
+        toast.success("Saved As Drafted");
+      } else {
+        toast.error("Error While drafting Application");
+      }
+      setFormData({
+        relationshipManagerName: "",
+        customerName: "",
+        address: "",
+        pan: "",
+        adharNumber: "",
+        dob: "",
+        email: "",
+        phoneNumber: "",
+        products: [],
+      });
+      setAsideClick("open_account");
+    } catch (err) {
+      console.log("error in saving draft");
+      toast.error("Error While drafting Application");
+    }
   };
-  const handleApplicationSubmit = () => {
-    setFormData({
-      relationshipManagerName: "",
-      customerName: "",
-      address: "",
-      pan: "",
-      adharNumber: "",
-      dob: "",
-      email: "",
-      phoneNumber: "",
-      selectedOptions: [],
-    });
-    setAsideClick("open_account");
-    toast.success("Applicatoin submited successfully");
+  const handleApplicationSubmit = async () => {
+    console.log("formData", formData);
+    formData.relationshipManagerId = userId;
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const response = await axios.post(
+        `${baseUrl}/application/submit`,
+        formData,
+        config
+      );
+      if (response.status === 200) {
+        toast.success("Submited Successfully");
+      } else {
+        toast.error("Error In Submitting");
+      }
+      setFormData({
+        relationshipManagerName: "",
+        customerName: "",
+        address: "",
+        pan: "",
+        adharNumber: "",
+        dob: "",
+        email: "",
+        phoneNumber: "",
+        products: [],
+      });
+      setAsideClick("open_account");
+    } catch (err) {
+      console.log("error in saving draft");
+      toast.error("Error While cathing");
+    }
+  };
 
-    //todo : here you need to call backend and status as pending
+  const handleDashboardClick = async () => {
+    setAsideClick("dashboard");
+    setIsLoading(true);
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const draftResponse = await axios.get(
+        `${baseUrl}/application/fetchDraft/${userId}`,
+        config
+      );
+
+      const submitedResponse = await axios.get(
+        `${baseUrl}/application/fetchSubmited/${userId}`,
+        config
+      );
+
+      if (draftResponse.status === 200 && submitedResponse.status === 200) {
+        setFetchDraftedData(draftResponse.data);
+        setFetchSubmitedData(submitedResponse.data);
+      } else {
+        toast.error("Fething data is failed");
+      }
+    } catch (err) {
+      console.err("error in loading a sumited status");
+    }
+    setIsLoading(false);
+    setDashboardSelection("drafted");
+  };
+
+  const handleViewApplication = (application) => {
+    console.log("view App" + application);
+    console.log(application.relationshipManagerName);
+    setViewApplicatoin(true);
   };
 
   return (
@@ -102,7 +189,7 @@ const MainContainer = () => {
         </div>
         <div
           className={style.asideOptionWrapper}
-          onClick={() => setAsideClick("dashboard")}
+          onClick={handleDashboardClick}
         >
           <span className={style.asideOptionsHeading}> Dashboard</span>
         </div>
@@ -357,7 +444,9 @@ const MainContainer = () => {
                       Relationship Manager Name
                     </span>
                   </div>
-                  <div className={style.tableFeildValue}></div>
+                  <div className={style.tableFeildValue}>
+                    {formData.relationshipManagerName}
+                  </div>
                 </div>
 
                 <div className={style.tableFeildWrapper}>
@@ -366,21 +455,25 @@ const MainContainer = () => {
                       Customer Name
                     </span>
                   </div>
-                  <div className={style.tableFeildValue}></div>
+                  <div className={style.tableFeildValue}>
+                    {formData.customerName}
+                  </div>
                 </div>
 
                 <div className={style.tableFeildWrapper}>
                   <div className={style.tableFeildName}>
                     <span className={style.tableFeildHeadingName}>Address</span>
                   </div>
-                  <div className={style.tableFeildValue}></div>
+                  <div className={style.tableFeildValue}>
+                    {formData.address}
+                  </div>
                 </div>
 
                 <div className={style.tableFeildWrapper}>
                   <div className={style.tableFeildName}>
                     <span className={style.tableFeildHeadingName}>PAN</span>
                   </div>
-                  <div className={style.tableFeildValue}></div>
+                  <div className={style.tableFeildValue}>{formData.pan}</div>
                 </div>
 
                 <div className={style.tableFeildWrapper}>
@@ -389,21 +482,23 @@ const MainContainer = () => {
                       Adhar Number
                     </span>
                   </div>
-                  <div className={style.tableFeildValue}></div>
+                  <div className={style.tableFeildValue}>
+                    {formData.adharNumber}
+                  </div>
                 </div>
 
                 <div className={style.tableFeildWrapper}>
                   <div className={style.tableFeildName}>
                     <span className={style.tableFeildHeadingName}>DOB</span>
                   </div>
-                  <div className={style.tableFeildValue}></div>
+                  <div className={style.tableFeildValue}>{formData.dob}</div>
                 </div>
 
                 <div className={style.tableFeildWrapper}>
                   <div className={style.tableFeildName}>
                     <span className={style.tableFeildHeadingName}>Email</span>
                   </div>
-                  <div className={style.tableFeildValue}></div>
+                  <div className={style.tableFeildValue}>{formData.email}</div>
                 </div>
 
                 <div className={style.tableFeildWrapper}>
@@ -412,7 +507,9 @@ const MainContainer = () => {
                       Phone Number
                     </span>
                   </div>
-                  <div className={style.tableFeildValue}></div>
+                  <div className={style.tableFeildValue}>
+                    {formData.phoneNumber}
+                  </div>
                 </div>
 
                 <div className={style.selectedProductWrapper}>
@@ -423,19 +520,9 @@ const MainContainer = () => {
                   </div>
                   <div className={style.tableSelectedProductWrapper}>
                     <ul>
-                      <li className={style.productListItem}>
-                        Saving Account with minimum 10k
-                      </li>
-                      <li className={style.productListItem}>
-                        Premium Saving Account with minimum 80K
-                      </li>
-                      <li className={style.productListItem}>Salary Account</li>
-                      <li className={style.productListItem}>Student Account</li>
-                      <li className={style.productListItem}>Minor Account</li>
-                      <li className={style.productListItem}>Current Account</li>
-                      <li className={style.productListItem}>
-                        Special Pension Scheme
-                      </li>
+                      {formData.products.map((product) => (
+                        <li className={style.productListItem}>{product}</li>
+                      ))}
                     </ul>
                   </div>
                 </div>
@@ -461,73 +548,147 @@ const MainContainer = () => {
         )}
         {asideClick === "dashboard" && (
           <>
-            <div className={style.dashboardContainer}>
-              <div className={style.dashboardCart}>
-                <div className={style.dashBoardStateWrapper}>
-                  <div
-                    className={style.formStatusHeading}
-                    onClick={() => {
-                      setDashboardSelection("submited");
-                    }}
-                  >
-                    <span className={style.statusHeadingText}>Submited</span>
-                  </div>
-                  <div className={style.formStatusCount}>
-                    <span className={style.statusHeadingCount}>03</span>
-                  </div>
-                </div>
-
-                <div
-                  className={style.dashBoardStateWrapper}
-                  onClick={() => {
-                    setDashboardSelection("drafted");
-                  }}
-                >
-                  <div className={style.formStatusHeading}>
-                    <span className={style.statusHeadingText}>Drafts</span>
-                  </div>
-                  <div className={style.formStatusCount}>
-                    <span className={style.statusHeadingCount}>04</span>
-                  </div>
-                </div>
-              </div>
-              <div className={style.cartResult}>
-                {dashBoardSelection === "submited" && (
-                  <>
-                    <div className={style.appBarContainer}>
-                      <div className={style.appBarInfoWrapper}>
-                        <div className={style.applicationBarInfo}>
-                          <span className={style.barInfoHeading}>
-                            Relationship Manager Name :
-                          </span>
-                          <span className={style.barInfoResult}>
-                            Pratik Bakare
-                          </span>
-                        </div>
-                        <div className={style.applicationBarInfo}>
-                          <span className={style.barInfoHeading}>
-                            Customer Name :
-                          </span>
-                          <span className={style.barInfoResult}>
-                            Pratik Bakare
-                          </span>
-                        </div>
-                        <div className={style.applicationBarInfo}>
-                          <span className={style.barInfoHeading}>Status :</span>
-                          <span className={style.barInfoResult}>pending</span>
-                        </div>
+            {isLoading === true ? (
+              <Spinners />
+            ) : (
+              <>
+                <div className={style.dashboardContainer}>
+                  <div className={style.dashboardCart}>
+                    <div
+                      className={style.dashBoardStateWrapper}
+                      onClick={() => {
+                        setDashboardSelection("drafted");
+                      }}
+                    >
+                      <div className={style.formStatusHeading}>
+                        <span className={style.statusHeadingText}>Drafts</span>
                       </div>
-                      <div className={style.appBarButtonWrapper}>
-                        <button className={style.appBarViewButton}>View</button>
+                      <div className={style.formStatusCount}>
+                        <span className={style.statusHeadingCount}>
+                          {fetchDraftedData.length}
+                        </span>
                       </div>
                     </div>
-                  </>
-                )}
-              </div>
-            </div>
+
+                    <div
+                      className={style.dashBoardStateWrapper}
+                      onClick={() => {
+                        setDashboardSelection("submited");
+                      }}
+                    >
+                      <div className={style.formStatusHeading}>
+                        <span className={style.statusHeadingText}>
+                          Submited
+                        </span>
+                      </div>
+                      <div className={style.formStatusCount}>
+                        <span className={style.statusHeadingCount}>
+                          {fetchSubmitedData.length}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={style.cartResult}>
+                    {dashBoardSelection === "drafted" && (
+                      <>
+                        {fetchDraftedData.map((singleApplication) => (
+                          <>
+                            <div className={style.appBarContainer}>
+                              <div className={style.appBarInfoWrapper}>
+                                <div className={style.applicationBarInfo}>
+                                  <span className={style.barInfoHeading}>
+                                    Relationship Manager Name :
+                                  </span>
+                                  <span className={style.barInfoResult}>
+                                    {singleApplication.relationshipManagerName}
+                                  </span>
+                                </div>
+                                <div className={style.applicationBarInfo}>
+                                  <span className={style.barInfoHeading}>
+                                    Customer Name :
+                                  </span>
+                                  <span className={style.barInfoResult}>
+                                    {singleApplication.customerName}
+                                  </span>
+                                </div>
+                                <div className={style.applicationBarInfo}>
+                                  <span className={style.barInfoHeading}>
+                                    Status :
+                                  </span>
+                                  <span className={style.barInfoResult}>
+                                    {singleApplication.applicationRequest}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className={style.appBarButtonWrapper}>
+                                <button
+                                  className={style.appBarViewButton}
+                                  onClick={() => {
+                                    handleViewApplication(singleApplication);
+                                  }}
+                                >
+                                  View
+                                </button>
+                              </div>
+                            </div>
+                          </>
+                        ))}
+                      </>
+                    )}
+                    {dashBoardSelection === "submited" && (
+                      <>
+                        {fetchSubmitedData.map((singleApplication) => (
+                          <>
+                            <div className={style.appBarContainer}>
+                              <div className={style.appBarInfoWrapper}>
+                                <div className={style.applicationBarInfo}>
+                                  <span className={style.barInfoHeading}>
+                                    Relationship Manager Name :
+                                  </span>
+                                  <span className={style.barInfoResult}>
+                                    {singleApplication.relationshipManagerName}
+                                  </span>
+                                </div>
+                                <div className={style.applicationBarInfo}>
+                                  <span className={style.barInfoHeading}>
+                                    Customer Name :
+                                  </span>
+                                  <span className={style.barInfoResult}>
+                                    {singleApplication.customerName}
+                                  </span>
+                                </div>
+                                <div className={style.applicationBarInfo}>
+                                  <span className={style.barInfoHeading}>
+                                    Status :
+                                  </span>
+                                  <span className={style.barInfoResult}>
+                                    {singleApplication.applicationRequest}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className={style.appBarButtonWrapper}>
+                                <button
+                                  className={style.appBarViewButton}
+                                  onClick={() =>
+                                    handleViewApplication(singleApplication)
+                                  }
+                                >
+                                  View
+                                </button>
+                              </div>
+                            </div>
+                          </>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
           </>
         )}
       </div>
+
       <ToastContainer />
     </div>
   );

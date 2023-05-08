@@ -20,7 +20,7 @@ const loginUser = async (req, res) => {
       return res.status(500).json("email or password are not correct");
     }
 
-    return res.status(200).json("login successfull");
+    return res.status(200).json(user);
   } catch (error) {
     console.error("error while logging");
   }

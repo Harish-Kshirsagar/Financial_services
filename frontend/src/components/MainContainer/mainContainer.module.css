@@ -245,6 +245,7 @@
   outline: none;
   font-size: large;
   font-weight: 700;
+  cursor: pointer;
 }
 
 .submitButton {
@@ -257,6 +258,7 @@
   outline: none;
   font-size: large;
   font-weight: 700;
+  cursor: pointer;
 }
 
 .tableFeildWrapper {
@@ -279,7 +281,10 @@
 .tableFeildValue {
   height: 100%;
   width: 50%;
-  border-left: 1px solid black;
+  /* border-left: 1px solid black; */
+  display: flex;
+  align-items: center;
+  margin-left: 2%;
   /* border: 1px solid green; */
 }
 
@@ -301,7 +306,9 @@
   height: 80%;
   width: 100%;
   overflow-y: scroll;
-  border: 1px solid black;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
   /* border: 2px solid red; */
 }
 
@@ -415,6 +422,7 @@
   outline: none;
   font-size: large;
   font-weight: 300;
+  cursor: pointer;
 }
 
 .applicationBarInfo {
@@ -431,4 +439,72 @@
 .barInfoResult {
   font-size: large;
   margin-left: 5px;
+}
+/* 
+ <div className={style.viewApplicationContainer}>
+          <div className={style.viewApplicationTable}>
+            
+          </div>
+        </div> */
+
+.viewApplicationContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(1px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.viewApplicationTable {
+  height: 99%;
+  width: 60%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  background-color: white;
+}
+
+.viewApplicationHeading {
+  height: 85%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.viewApplicationBottom {
+  height: 15%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10%;
+}
+
+.closeAppButton,
+.rejectApplicationButton,
+.acceptApplicationButton {
+  height: 45px;
+  width: 100px;
+  color: white;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+}
+
+.closeAppButton {
+  background-color: red;
+}
+.rejectApplicationButton {
+  background-color: blue;
+}
+.acceptApplicationButton {
+  background-color: green;
 }
