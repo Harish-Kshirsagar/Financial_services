@@ -6,11 +6,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 const MainContainer = () => {
   const [asideClick, setAsideClick] = useState("open_account");
-  const [applicationFormClick, setApplicationFormClick] =
-    useState("form_details");
-  const [dashBoardSelection, setDashboardSelection] = useState(
-    "submited_application"
-  );
+  const [dashBoardSelection, setDashboardSelection] = useState("submited");
 
   const [formData, setFormData] = useState({
     relationshipManagerName: "",
@@ -98,10 +94,16 @@ const MainContainer = () => {
   return (
     <div className={style.mainContaintContainer}>
       <div className={style.asideContainer}>
-        <div className={style.asideOptionWrapper}>
+        <div
+          className={style.asideOptionWrapper}
+          onClick={() => setAsideClick("open_account")}
+        >
           <span className={style.asideOptionsHeading}> Open Account</span>
         </div>
-        <div className={style.asideOptionWrapper}>
+        <div
+          className={style.asideOptionWrapper}
+          onClick={() => setAsideClick("dashboard")}
+        >
           <span className={style.asideOptionsHeading}> Dashboard</span>
         </div>
       </div>
@@ -453,6 +455,74 @@ const MainContainer = () => {
                     Submit Application
                   </button>
                 </div>
+              </div>
+            </div>
+          </>
+        )}
+        {asideClick === "dashboard" && (
+          <>
+            <div className={style.dashboardContainer}>
+              <div className={style.dashboardCart}>
+                <div className={style.dashBoardStateWrapper}>
+                  <div
+                    className={style.formStatusHeading}
+                    onClick={() => {
+                      setDashboardSelection("submited");
+                    }}
+                  >
+                    <span className={style.statusHeadingText}>Submited</span>
+                  </div>
+                  <div className={style.formStatusCount}>
+                    <span className={style.statusHeadingCount}>03</span>
+                  </div>
+                </div>
+
+                <div
+                  className={style.dashBoardStateWrapper}
+                  onClick={() => {
+                    setDashboardSelection("drafted");
+                  }}
+                >
+                  <div className={style.formStatusHeading}>
+                    <span className={style.statusHeadingText}>Drafts</span>
+                  </div>
+                  <div className={style.formStatusCount}>
+                    <span className={style.statusHeadingCount}>04</span>
+                  </div>
+                </div>
+              </div>
+              <div className={style.cartResult}>
+                {dashBoardSelection === "submited" && (
+                  <>
+                    <div className={style.appBarContainer}>
+                      <div className={style.appBarInfoWrapper}>
+                        <div className={style.applicationBarInfo}>
+                          <span className={style.barInfoHeading}>
+                            Relationship Manager Name :
+                          </span>
+                          <span className={style.barInfoResult}>
+                            Pratik Bakare
+                          </span>
+                        </div>
+                        <div className={style.applicationBarInfo}>
+                          <span className={style.barInfoHeading}>
+                            Customer Name :
+                          </span>
+                          <span className={style.barInfoResult}>
+                            Pratik Bakare
+                          </span>
+                        </div>
+                        <div className={style.applicationBarInfo}>
+                          <span className={style.barInfoHeading}>Status :</span>
+                          <span className={style.barInfoResult}>pending</span>
+                        </div>
+                      </div>
+                      <div className={style.appBarButtonWrapper}>
+                        <button className={style.appBarViewButton}>View</button>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </>
