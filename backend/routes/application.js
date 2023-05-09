@@ -9,6 +9,10 @@ router.get(
   "/fetchSubmited/:id",
   applicationController.fetchSubmitedApplication
 );
+router.get(
+  "/fetchApplication",
+  applicationController.fetchForOprationalManager
+);
 router.put("/accept", applicationController.acceptApplication);
 router.put("/reject", applicationController.rejectApplication);
 module.exports = router;

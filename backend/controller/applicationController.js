@@ -78,6 +78,7 @@ const submitApplication = async (req, res) => {
 };
 
 const fetchDraftApplication = async (req, res) => {
+  // console.log("atleast here I came");
   try {
     const relationshipMangerId = req.params.id;
     const relationshipManger = await User.findById(relationshipMangerId);
@@ -90,6 +91,8 @@ const fetchDraftApplication = async (req, res) => {
         return AccountApplication.findById(application);
       })
     );
+
+    console.log("fetchApplication " + allApplications);
 
     const draftedApplications = allApplications.filter((application) => {
       return application.formStatus === "draft";
@@ -140,7 +143,7 @@ const acceptApplication = async (req, res) => {
 
     const updatedApplication = await AccountApplication.findByIdAndUpdate(
       applicationId,
-      { formStatus: "accepted", applicationRequest: "accepted" },
+      { formStatus: "submited", applicationRequest: "accepted" },
       { new: true }
     );
 
@@ -167,7 +170,7 @@ const rejectApplication = async (req, res) => {
 
     const updatedApplication = await AccountApplication.findByIdAndUpdate(
       applicationId,
-      { formStatus: "rejected", applicationRequest: "rejected" },
+      { formStatus: "submited", applicationRequest: "rejected" },
       { new: true }
     );
 
@@ -181,6 +184,20 @@ const rejectApplication = async (req, res) => {
   }
 };
 
+const fetchForOprationalManager = async (req, res) => {
+  try {
+    const allApplication = await AccountApplication.find({
+      applicationRequest: "pending",
+    });
+    return res.status(200).json(allApplication);
+  } catch (err) {
+    console.error("error in fetchin data");
+    return res
+      .status(500)
+      .json("Error in fetching data for operational manager");
+  }
+};
+
 module.exports = {
   test,
   createDraftApplication,
@@ -189,4 +206,5 @@ module.exports = {
   fetchSubmitedApplication,
   acceptApplication,
   rejectApplication,
+  fetchForOprationalManager,
 };
